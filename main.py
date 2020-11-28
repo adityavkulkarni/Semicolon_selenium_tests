@@ -72,7 +72,7 @@ class SemiColonTestCases(unittest.TestCase):
                         self.assertTrue(solvents.is_blog_title_displayed(blog))
                         self.assertTrue(solvents.is_blog_link_displayed(blog))
                         self.assertTrue(solvents.is_blog_image_displayed(blog))
-                        
+
         def test_verify_blog_page(self):
                 solvents = self.solvents
                 name = "Getting Started With Machine Learning"
