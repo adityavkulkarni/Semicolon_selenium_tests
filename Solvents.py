@@ -7,7 +7,6 @@ import re
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 
-
 def wait(sec=5):
         time.sleep(sec)
 class Semicolon():
@@ -27,7 +26,6 @@ class Semicolon():
                 global driver
                 driver.get(self.__url__+"blogs")
                 wait()
-
 
 class Solvents(Semicolon):
         email_user1 = 'user1@semicolon.com'
