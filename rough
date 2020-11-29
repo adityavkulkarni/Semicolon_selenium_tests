@@ -1,14 +1,9 @@
-
-             '''   email = 'adityavkulkarni09@gmail.com'
-                pwd = 'semicolon/test'
-                solvents.click_header_login_button()
-                wait()
-                self.assertTrue('user/login' in solvents.get_current_url())
-                solvents.add_login_details(email, pwd)
-                wait()
-                solvents.click_submit_login_button()
-                wait(4)
-                self.assertTrue(solvents.is_login_msg_displayed())'''
+                if  not solvents.is_user_logged_in():
+                        solvents.click_header_login_button()
+                        self.assertTrue('user/login' in solvents.get_current_url())
+                        self.assertTrue(solvents.login(self.email_user1,self.pwd_user1))
+                self.assertTrue(solvents.is_new_blog_button_displayed())
+                solvents.click_new_blog_button()
 
                 admin: admin@semicolon.com
                 admin@semicolon.com

@@ -105,12 +105,7 @@ class SemiColonTestCases(unittest.TestCase):
                 wait()
         def test_verify_new_blog_button(self):
                 solvents = self.solvents
-                if  not solvents.is_user_logged_in():
-                        solvents.click_header_login_button()
-                        self.assertTrue('user/login' in solvents.get_current_url())
-                        self.assertTrue(solvents.login(self.email_user1,self.pwd_user1))
-                self.assertTrue(solvents.is_new_blog_button_displayed())
-                solvents.click_new_blog_button()
+                self.assertTrue(solvents.go_to_new_blog_page())
                 wait()
                 self.assertTrue("/blogs/new" in solvents.get_current_url())
                 solvents.click_log_out_button()
@@ -125,12 +120,7 @@ class SemiColonTestCases(unittest.TestCase):
                 self.assertTrue(solvents.is_unregistered_user_alert_visible())
         def test_verify_new_blog_page_structure(self):
                 solvents = self.solvents
-                if not solvents.is_user_logged_in():
-                        solvents.click_header_login_button()
-                        self.assertTrue('user/login' in solvents.get_current_url())
-                        self.assertTrue(solvents.login(self.email_user1, self.pwd_user1))
-                self.assertTrue(solvents.is_new_blog_button_displayed())
-                solvents.click_new_blog_button()
+                self.assertTrue(solvents.go_to_new_blog_page())
                 wait()
                 self.assertTrue("/blogs/new" in solvents.get_current_url())
                 self.assertTrue(solvents.is_new_blog_page_title())
@@ -139,12 +129,7 @@ class SemiColonTestCases(unittest.TestCase):
                 self.assertTrue(solvents.is_tag_element_disabled("draft","button"))
         def test_verify_new_blog_input_fields(self):
                 solvents = self.solvents
-                if not solvents.is_user_logged_in():
-                        solvents.click_header_login_button()
-                        self.assertTrue('user/login' in solvents.get_current_url())
-                        self.assertTrue(solvents.login(self.email_user1, self.pwd_user1))
-                self.assertTrue(solvents.is_new_blog_button_displayed())
-                solvents.click_new_blog_button()
+                self.assertTrue(solvents.go_to_new_blog_page())
                 wait()
                 self.assertTrue("/blogs/new" in solvents.get_current_url())
                 self.assertTrue(solvents.is_new_blog_page_title())
@@ -154,12 +139,7 @@ class SemiColonTestCases(unittest.TestCase):
                 self.assertTrue(solvents.is_new_blog_markdown_preview_visible())
         def test_verify_toolbar_button_visible(self):
                 solvents = self.solvents
-                if not solvents.is_user_logged_in():
-                        solvents.click_header_login_button()
-                        self.assertTrue('user/login' in solvents.get_current_url())
-                        self.assertTrue(solvents.login(self.email_user1, self.pwd_user1))
-                self.assertTrue(solvents.is_new_blog_button_displayed())
-                solvents.click_new_blog_button()
+                self.assertTrue(solvents.go_to_new_blog_page())
                 wait()
                 self.assertTrue("/blogs/new" in solvents.get_current_url())
                 buttons = ['bold', 'italic', 'strikethrough', 'hr', 'title', 'link', 'quote', 'code', 'image',
@@ -167,6 +147,62 @@ class SemiColonTestCases(unittest.TestCase):
                 for button in buttons:
                         self.assertTrue(solvents.verify_toolbar_buttons(button))
                 wait(2)
-
+        def test_text_formatting_options_preview_toolbar(self):
+                solvents = self.solvents
+                self.assertTrue(solvents.go_to_new_blog_page())
+                wait()
+                self.assertTrue("/blogs/new" in solvents.get_current_url())
+                buttons = ['bold', 'italic', 'strikethrough', 'title',  'quote', 'code']
+                solvents.send_keys_to_editor("Plain Text")
+                self.assertTrue("Plain Text" in solvents.get_markdown_preview_contents())
+                for button in buttons:
+                        text = button
+                        solvents.clear_text_area()
+                        solvents.click_toolbar_button(button)
+                        wait(1)
+                        solvents.send_keys_to_editor(text)
+                        self.assertTrue(text in solvents.get_markdown_preview_contents(button))
+                        wait(1)
+                wait(2)
+        def test_verify_horizontal_rule_preview(self):
+                solvents = self.solvents
+                self.assertTrue(solvents.go_to_new_blog_page())
+                wait()
+                self.assertTrue("/blogs/new" in solvents.get_current_url())
+                solvents.click_toolbar_button("hr")
+                wait(2)
+                self.assertTrue(solvents.get_markdown_preview_contents("hr"))
+                wait(2)
+        def test_verify_link_preview(self):
+                solvents = self.solvents
+                self.assertTrue(solvents.go_to_new_blog_page())
+                wait()
+                self.assertTrue("/blogs/new" in solvents.get_current_url())
+                solvents.set_link_in_textarea("Link Text","https://www.google.com")
+                self.assertTrue(solvents.verify_link_preview_markdown("https://www.google.com"))
+        def test_verify_image_preview(self):
+                solvents = self.solvents
+                self.assertTrue(solvents.go_to_new_blog_page())
+                wait()
+                self.assertTrue("/blogs/new" in solvents.get_current_url())
+                solvents.set_image_in_textarea("Image",
+                                               "https://raw.githubusercontent.com/adityavkulkarni/Semicolon_selenium_tests/master/resources/image.jpg")
+                wait(1)
+                self.assertTrue(solvents.verify_image_preview_markdown("Image",
+                                                                       "https://raw.githubusercontent.com/adityavkulkarni/Semicolon_selenium_tests/master/resources/image.jpg"))
+        def test_verify_list_preview(self):
+                solvents = self.solvents
+                self.assertTrue(solvents.go_to_new_blog_page())
+                wait()
+                print("HI")
+                self.assertTrue("/blogs/new" in solvents.get_current_url())
+                types = ["unordered-list","ordered-list","checked-list"]
+                values = ["1","2","3"]
+                for type in types:
+                        solvents.set_list_in_textarea(type,values)
+                        wait(1)
+                        self.assertTrue(solvents.verify_list_preview_markdown(type,values))
+                        solvents.clear_text_area()
 if __name__ == '__main__':
+        #unittest.main()
         unittest.main(testRunner=HtmlTestRunner.HTMLTestRunner(output=os.curdir + "/HTML_Reports"))
