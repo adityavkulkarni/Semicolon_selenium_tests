@@ -31,7 +31,7 @@ class Semicolon():
 
 class Solvents(Semicolon):
         def __init__(self):
-                self.text_element = '//TAG[contains(text(),"LABEL")]'
+                self.tag_element = '//TAG[contains(text(),"LABEL")]'
                 self.login_button_1='//button[@class="css-1at8pli"][contains(text(),"LOGIN")]'
                 self.login_button_2 = '//button[@class="css-e62wgj"][contains(text(),"Login")]'
                 self.header_title = '//div[@id="root"]//header//h2//a[text()="Semicolon;"]'
@@ -50,11 +50,42 @@ class Solvents(Semicolon):
                 self.blog_view_title = self.blog_view_div + '//h2[contains(text(),"NAME")]'
                 self.blog_view_banner_img = self.blog_view_div + '//img[contains(@class,"css-muypb7")]'
                 self.new_blog_button = '//button//a[contains(@href,"new")]//p[contains(text(),"NEW BLOG")]'
+                self.unregistered_user_alert = '//div[@role="alert"]//div[contains(text(),"Invalid Credentials. Please check again.")]'
+                self.new_blog_page = '//form'
+                self.new_blog_page_title = self.new_blog_page+'//h2[contains(text(),"New Blog")]'
+                self.new_blog_input_textarea = self.new_blog_page+'//textarea[contains(@class,"editor")]'
+                self.new_blog_input_markdown_preview = self.new_blog_page + '//div[contains(@class,"markdown")]'
+                self.new_blog_image_url_input = self.new_blog_page+'//input[contains(@name,"bannerURL")][@type="url"]'
+                self.new_blog_name_input = self.new_blog_page + '//input[contains(@name,"title")][@type="text"]'
+                self.new_blog_toolbar = self.new_blog_page+'//div[contains(@class,"editor-toolbar")]'
+
+        def generate_toolbar_dict(self):
+                toolbar_buttons = {}
+                toolbar_buttons["bold"]=self.new_blog_toolbar+'//button[contains(@data-name,"bold")]'
+                toolbar_buttons["italic"]= self.italic_button = self.new_blog_toolbar + '//button[contains(@data-name,"italic")]'
+                toolbar_buttons["strikethrough"]=self.strikethrough_button = self.new_blog_toolbar + '//button[contains(@data-name,"strikethrough")]'
+                toolbar_buttons["hr"]=self.hr_button = self.new_blog_toolbar + '//button[contains(@data-name,"hr")]'
+                toolbar_buttons["title"]=self.title_button = self.new_blog_toolbar + '//button[contains(@data-name,"title")]'
+                toolbar_buttons["link"]=self.link_button = self.new_blog_toolbar + '//button[contains(@data-name,"link")]'
+                toolbar_buttons["quote"]=self.quote_button = self.new_blog_toolbar + '//button[contains(@data-name,"quote")]'
+                toolbar_buttons["code"]=self.code_button = self.new_blog_toolbar + '//button[contains(@data-name,"code")]'
+                toolbar_buttons["image"]=self.image_button = self.new_blog_toolbar + '//button[contains(@data-name,"image")]'
+                toolbar_buttons["unordered-list"]=self.unordered_button = self.new_blog_toolbar + '//button[contains(@data-name,"unordered-list")]'
+                toolbar_buttons["ordered-list"]=self.ordered_button = self.new_blog_toolbar + '//button[contains(@data-name,"ordered-list")]'
+                toolbar_buttons["checked-list"]=self.checked_button = self.new_blog_toolbar + '//button[contains(@data-name,"checked-list")]'
+                toolbar_buttons["edit"]=self.edit_button = self.new_blog_toolbar + '//button[contains(@data-name,"edit")]'
+                toolbar_buttons["live"]=self.live_button = self.new_blog_toolbar + '//button[contains(@data-name,"live")]'
+                toolbar_buttons["preview"]=self.preview_button = self.new_blog_toolbar + '//button[contains(@data-name,"preview")]'
+                toolbar_buttons["fullscreen"]=self.fullscreen_button = self.new_blog_toolbar + '//button[contains(@data-name,"fullscreen")]'
+                return  toolbar_buttons
         def is_tag_element_visible(self, label,tag):
-                text_element = driver.find_element_by_xpath(self.text_element.replace("LABEL", label).replace('TAG',tag))
-                if text_element.is_displayed():
-                        return True
-                return False
+                element = driver.find_element_by_xpath(self.tag_element.replace("LABEL", label).replace('TAG', tag))
+                try: return element.is_displayed()
+                except: return False
+        def is_tag_element_disabled(self,label,tag):
+                ele = driver.find_element_by_xpath(self.tag_element.replace("LABEL", label).replace('TAG', tag))
+                try: return ele.get_attribute("aria-disabled")=="true"
+                except: return  False
         def verify_login_buttons(self):
                 button1 = driver.find_element_by_xpath(self.login_button_1)
                 button2 = driver.find_element_by_xpath(self.login_button_2)
@@ -87,7 +118,7 @@ class Solvents(Semicolon):
                 return driver.current_url
         def click_button(self,label):
                 wait()
-                button = driver.find_element_by_xpath(self.text_element.replace("TAG","button").replace("LABEL",label))
+                button = driver.find_element_by_xpath(self.tag_element.replace("TAG", "button").replace("LABEL", label))
                 button.click()
         def click_header_login_button(self):
                 wait()
@@ -106,7 +137,7 @@ class Solvents(Semicolon):
                 login.click()
         def click_link(self,label):
                 wait()
-                link = driver.find_element_by_xpath(self.text_element.replace("TAG","a").replace("LABEL",label))
+                link = driver.find_element_by_xpath(self.tag_element.replace("TAG", "a").replace("LABEL", label))
                 link.click()
         def switch_to_last_tab(self):
                 driver.switch_to.window(driver.window_handles[-1])
@@ -119,7 +150,7 @@ class Solvents(Semicolon):
                 title = driver.find_element_by_xpath(self.blog_page_title)
                 return title.is_displayed()
         def scroll_till_label(self,label):
-                ele = driver.find_element_by_xpath(self.text_element.replace("TAG","*").replace("LABEL",label))
+                ele = driver.find_element_by_xpath(self.tag_element.replace("TAG", "*").replace("LABEL", label))
                 actions = ActionChains(driver)
                 actions.move_to_element(ele).perform()
         def is_blog_title_displayed(self,label):
@@ -171,10 +202,50 @@ class Solvents(Semicolon):
                 button = driver.find_element_by_xpath(self.new_blog_button)
                 button.click()
         def click_log_out_button(self):
-                button = driver.find_element_by_xpath(self.text_element.replace("TAG","button").replace("LABEL","LOG OUT"))
+                button = driver.find_element_by_xpath(self.tag_element.replace("TAG", "button").replace("LABEL", "LOG OUT"))
                 button.click()
         def is_user_logged_in(self):
                 try:
                         return self.is_new_blog_button_displayed()
                 except:
                         return False
+        def login(self,email,pwd):
+                self.add_login_details(email, pwd)
+                wait()
+                self.click_submit_login_button()
+                wait(4)
+                try:
+                        return self.is_login_msg_displayed()
+                except:return False
+        def is_log_out_msg_displayed(self):
+                msg = driver.find_element_by_xpath(self.tag_element.replace("LABEL","Successfully logged out.").replace("TAG","div"))
+                try: return msg.is_displayed()
+                except: return False
+        def is_unregistered_user_alert_visible(self):
+                alert = driver.find_element_by_xpath(self.unregistered_user_alert)
+                return alert.is_displayed()
+        def is_new_blog_page_title(self):
+                title = driver.find_element_by_xpath(self.new_blog_page_title)
+                return title.is_displayed()
+        def is_new_blog_title_input_visible(self):
+                ele = driver.find_element_by_xpath(self.new_blog_name_input)
+                return ele.is_displayed()
+        def is_new_blog_image_input_visible(self):
+                ele = driver.find_element_by_xpath(self.new_blog_image_url_input)
+                return ele.is_displayed()
+        def is_new_blog_textarea_input_visible(self):
+                ele = driver.find_element_by_xpath(self.new_blog_input_textarea)
+                return ele.is_displayed()
+        def is_new_blog_markdown_preview_visible(self):
+                ele = driver.find_element_by_xpath(self.new_blog_input_markdown_preview)
+                return ele.is_displayed()
+        def verify_toolbar_buttons(self,button):
+                toolbar_buttons = self.generate_toolbar_dict()
+                button = driver.find_element_by_xpath(toolbar_buttons[button])
+                try: return button.is_displayed()
+                except: return  False
+        def click_toolbar_buttons(self,button):
+                toolbar_buttons = self.generate_toolbar_dict()
+                button = driver.find_element_by_xpath(toolbar_buttons[button])
+                button.click()
+
