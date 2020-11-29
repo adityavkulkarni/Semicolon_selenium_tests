@@ -9,3 +9,6 @@
                 solvents.click_submit_login_button()
                 wait(4)
                 self.assertTrue(solvents.is_login_msg_displayed())'''
+
+                admin: admin@semicolon.com
+                admin@semicolon.com

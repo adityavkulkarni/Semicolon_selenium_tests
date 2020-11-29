@@ -5,21 +5,27 @@ import  time
 import re
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
-driver = webdriver.Chrome(os.curdir + '/chromedriver',chrome_options=options)
+#driver = webdriver.Chrome(os.curdir + '/chromedriver',chrome_options=options)
 
 
-def wait(sec=2):
+def wait(sec=5):
         time.sleep(sec)
 class Semicolon():
         def __init__(self):
-                self.__url__ = "http://semicolon-blog.netlify.app/"
+                self.__url__ = "http://localhost:3000/"
         def quit(self):
+                global driver
                 driver.quit()
+        def create_driver(self):
+                global  driver
+                driver = webdriver.Chrome(os.curdir + '/chromedriver',chrome_options=options)
         def launchsemicolon(self):
+                global driver
                 driver.get(self.__url__)
                 wait()
         def launch_blogs_page(self):
-                driver.get("https://semicolon-blog.netlify.app/blogs")
+                global driver
+                driver.get(self.__url__+"blogs")
                 wait()
 
 
@@ -40,9 +46,9 @@ class Solvents(Semicolon):
                 self.blog_title = self.blog_heading_class+'[contains(text(),"NAME")]'
                 self.blog_link = '//a[contains(@href,"NAME")]'
                 self.blog_img = self.blog_link+'//descendant::img[contains(@class,"blog-banner")]'
-                self.blog_div = '//div[@id="container"]'
-                self.blog_name = self.blog_div+'//h2[contains(text(),"NAME")]'
-                self.blog_banner_img = self.blog_div+'//img[contains(@class,"css-muypb7")]'
+                self.blog_view_div = '//div[@id="container"]'
+                self.blog_view_title = self.blog_view_div + '//h2[contains(text(),"NAME")]'
+                self.blog_view_banner_img = self.blog_view_div + '//img[contains(@class,"css-muypb7")]'
                 self.new_blog_button = '//button//a[contains(@href,"new")]//p[contains(text(),"NEW BLOG")]'
         def is_tag_element_visible(self, label,tag):
                 text_element = driver.find_element_by_xpath(self.text_element.replace("LABEL", label).replace('TAG',tag))
@@ -150,10 +156,10 @@ class Solvents(Semicolon):
                 wait()
                 title.click()
         def is_blog_view_title_displayed(self,name):
-                title = driver.find_element_by_xpath(self.blog_name.replace("NAME",name))
+                title = driver.find_element_by_xpath(self.blog_view_title.replace("NAME", name))
                 return  title.is_displayed()
         def is_blog_view_image_displayed(self):
-                img = driver.find_element_by_xpath(self.blog_banner_img)
+                img = driver.find_element_by_xpath(self.blog_view_banner_img)
                 return  img.is_displayed()
         def is_link_displayed(self,url):
                 link = driver.find_element_by_xpath(self.blog_link.replace("NAME",url))
@@ -164,3 +170,11 @@ class Solvents(Semicolon):
         def click_new_blog_button(self):
                 button = driver.find_element_by_xpath(self.new_blog_button)
                 button.click()
+        def click_log_out_button(self):
+                button = driver.find_element_by_xpath(self.text_element.replace("TAG","button").replace("LABEL","LOG OUT"))
+                button.click()
+        def is_user_logged_in(self):
+                try:
+                        return self.is_new_blog_button_displayed()
+                except:
+                        return False
