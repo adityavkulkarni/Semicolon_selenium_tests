@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 import os
 import  time
 import re
+import  pymongo
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 
@@ -26,7 +27,18 @@ class Semicolon():
                 global driver
                 driver.get(self.__url__+"blogs")
                 wait()
-
+def delete_blog(name):
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+        mydb = myclient["blogdb"]
+        mycol = mydb["blogs"]
+        myquery = {"title": name}
+        mycol.delete_one(myquery)
+def delete_user(name):
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+        mydb = myclient["blogdb"]
+        mycol = mydb["users"]
+        myquery = {"username": name}
+        mycol.delete_one(myquery)
 class Solvents(Semicolon):
         email_user1 = 'user1@semicolon.com'
         pwd_user1 = 'semicolon/test'
@@ -58,7 +70,12 @@ class Solvents(Semicolon):
                 self.new_blog_image_url_input = self.new_blog_page+'//input[contains(@name,"bannerURL")][@type="url"]'
                 self.new_blog_name_input = self.new_blog_page + '//input[contains(@name,"title")][@type="text"]'
                 self.new_blog_toolbar = self.new_blog_page+'//div[contains(@class,"editor-toolbar")]'
-
+                self.new_blog_fullscreen = self.new_blog_page+'//div[contains(@class,"w-md-editor-content")][contains(@style,"100%")]'
+                self.uname_input = '//input[@id="username"]'
+                self.admin_table_blog_title = '//table//tbody//tr//td[2]'
+                self.admin_table_blog_author = '//table//tbody//tr//td[4]'
+                self.admin_table_blog_status = '//table//tbody//tr//td[7]'
+                self.approve_button = '//td[contains(text(),"Title")]//following-sibling::td//button[contains(text(),"Approve")]'
         def generate_toolbar_dict(self):
                 toolbar_buttons = {}
                 toolbar_buttons["bold"]=self.new_blog_toolbar+'//button[contains(@data-name,"bold")]'
@@ -95,6 +112,18 @@ class Solvents(Semicolon):
                 tags["unordered-list-element"] = self.new_blog_input_markdown_preview + '//ul//li'
                 tags["ordered-list-element"]=self.new_blog_input_markdown_preview+'//ol//li'
                 tags["checked-list-element"] = self.new_blog_input_markdown_preview + '//ul//li'
+                return  tags
+        def generate_blog_dict(self):
+                tags = {}
+                tags["bold"] = '//div[contains(@class,"md-content")]//strong'
+                tags["italic"] = '//div[contains(@class,"md-content")]//em'
+                tags["strikethrough"] = '//div[contains(@class,"md-content")]//del'
+                tags["hr"] = '//div[contains(@class,"md-content")]//hr'
+                tags["title"] = '//div[contains(@class,"md-content")]//h2//span'
+                tags["link"] = '//div[contains(@class,"md-content")]//a'
+                tags["quote"] = '//div[contains(@class,"md-content")]//code//span'
+                tags["code"] = '//div[contains(@class,"md-content")]//h2//code'
+                tags["image"] = '//div[contains(@class,"md-content")]//img'
                 return  tags
         def is_tag_element_visible(self, label,tag):
                 element = driver.find_element_by_xpath(self.tag_element.replace("LABEL", label).replace('TAG', tag))
@@ -359,4 +388,82 @@ class Solvents(Semicolon):
                                 except: return False
                         if ele.text not in values : return  False
                 return  True
-
+        def is_markdown_panes_visible(self,type):
+                try:
+                        if type == "editor":
+                               ele = driver.find_element_by_xpath(self.new_blog_input_textarea)
+                        elif type =="preview":
+                                ele = driver.find_element_by_xpath(self.new_blog_input_markdown_preview)
+                        return  ele.is_displayed()
+                except:
+                        return  False
+        def is_editor_fullscreen(self):
+                try:
+                        ele = driver.find_element_by_xpath(self.new_blog_fullscreen)
+                        return  ele.is_displayed()
+                except:
+                        return  False
+        def click_register(self):
+                ele = driver.find_element_by_xpath(self.header_links.replace("LINK", "register"))
+                wait(1)
+                ele.click()
+        def add_register_details(self,usename,email,pwd):
+                uname_input = driver.find_element_by_xpath(self.uname_input)
+                email_input = driver.find_element_by_xpath(self.email_input)
+                pwd_input = driver.find_element_by_xpath(self.password_input)
+                uname_input.send_keys(usename)
+                wait()
+                email_input.send_keys(email)
+                wait()
+                pwd_input.send_keys(pwd)
+                wait()
+        def verify_admin_page(self,blogs = []):
+                ret = self.is_tag_element_visible("Admin Page","h1")
+                if(len(blogs)>0):
+                        for i in range(len(blogs)):
+                                title = driver.find_element_by_xpath("("+self.admin_table_blog_title+")["+str(i+1)+"]")
+                                author = driver.find_element_by_xpath("("+self.admin_table_blog_author+")["+str(i+1)+"]")
+                                status = driver.find_element_by_xpath("("+self.admin_table_blog_status+")["+str(i+1)+"]")
+                                if title.text not in blogs[i][0] or author.text not in blogs[i][1] or status.text not in blogs[i][2]:
+                                        return  False
+                return  ret and True
+        def set_new_blog_title_and_image_input(self,title,url):
+                ele = driver.find_element_by_xpath(self.new_blog_name_input)
+                ele.send_keys(title)
+                ele = driver.find_element_by_xpath(self.new_blog_image_url_input)
+                ele.send_keys(url)
+        def approve_blog(self,name):
+                ele = driver.find_element_by_xpath(self.approve_button.replace('Title',name))
+                ele.click()
+        def verify_blog_contents(self,content_dict):
+                blog_dict = self.generate_blog_dict()
+                for type in content_dict:
+                        if type == "Text":
+                                ele = self.is_tag_element_visible(content_dict[type],"*")
+                                if not ele: return False
+                        elif type == "link":
+                                ele = driver.find_element_by_xpath(blog_dict[type])
+                                try:
+                                        ele.is_displayed()
+                                        if content_dict[type][1] not in ele.get_attribute('href') or content_dict[type][0] not in ele.text:
+                                                return False
+                                except:
+                                        return False
+                        elif type == "image":
+                                ele = driver.find_element_by_xpath(blog_dict[type])
+                                try:
+                                        ele.is_displayed()
+                                        if content_dict[type][1] not in ele.get_attribute('src') or content_dict[type][0] not in ele.get_attribute('alt'):
+                                                return False
+                                except:
+                                        return False
+                        else:
+                                ele = driver.find_element_by_xpath(blog_dict[type])
+                                try:
+                                        ele.is_displayed()
+                                        if  type not in ele.text:
+                                                return False
+                                except:
+                                        return False
+                        wait(2)
+                return True

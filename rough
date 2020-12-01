@@ -1,9 +1,16 @@
-                if  not solvents.is_user_logged_in():
-                        solvents.click_header_login_button()
-                        self.assertTrue('user/login' in solvents.get_current_url())
-                        self.assertTrue(solvents.login(self.email_user1,self.pwd_user1))
-                self.assertTrue(solvents.is_new_blog_button_displayed())
-                solvents.click_new_blog_button()
-
-                admin: admin@semicolon.com
-                admin@semicolon.com
+tags["bold"]= '//strong'
+                tags["italic"]='//em'
+                tags["strikethrough"]='//del'
+                tags["hr"]='//hr'
+                tags["title"]='//h2'
+                tags["link"]='//a'
+                tags["quote"]='//blockquote'
+                tags["code"]='//code'
+                tags["image"]='//img'
+                tags["unordered-list"]='//ul'
+                tags["ordered-list"]='//ol'
+                tags["checked-list"]='//ul'
+                tags["unordered-list-element"] =   '//ul//li'
+                tags["ordered-list-element"]='//ol//li'
+                tags["checked-list-element"] =   '//ul//li'
+                
