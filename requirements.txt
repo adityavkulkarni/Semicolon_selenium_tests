@@ -1,2 +1,4 @@
 selenium==3.141.0
 HtmlTestRunner==0.8.0
+setuptools~=49.6.0
+pymongo~=3.11.1
